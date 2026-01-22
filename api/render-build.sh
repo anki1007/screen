@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Exit on error
 set -o errexit
 
 STORAGE_DIR=/opt/render/project/.render
@@ -11,14 +12,16 @@ if [[ ! -d $STORAGE_DIR/chrome ]]; then
   dpkg -x ./google-chrome-stable_current_amd64.deb $STORAGE_DIR/chrome
   rm ./google-chrome-stable_current_amd64.deb
   
-  # CRITICAL: This unlocks Chrome so the server can run it
+  # UNLOCK PERMISSIONS
   chmod +x $STORAGE_DIR/chrome/opt/google/chrome/chrome
   cd -
 else
   echo "...Using Chrome from cache"
 fi
 
+# INSTALL LIBRARIES
 pip install -r requirements.txt
 
-echo "...Installing Selenium Drivers"
-python -c "from webdriver_manager.chrome import ChromeDriverManager; ChromeDriverManager().install()"
+# FORCE INSTALL MATCHING DRIVER
+echo "...Installing Matching Selenium Drivers"
+python -c "from webdriver_manager.chrome import ChromeDriverManager; from selenium.webdriver.chrome.service import Service; ChromeDriverManager().install()"
