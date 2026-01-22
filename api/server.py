@@ -17,7 +17,7 @@ CORS(app)
 driver = None
 
 def init_driver():
-    """Initializes Headless Chrome for Cloud Environments"""
+    """Initializes Headless Chrome for Render Environment"""
     global driver
     if driver is None:
         print("Initializing Chrome...")
@@ -25,16 +25,22 @@ def init_driver():
         chrome_options.add_argument("--headless") 
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--remote-debugging-port=9222")
         
-        # --- NEW FIX FOR RENDER ---
-        # If we are running on Render, use the Chrome binary we downloaded
+        # --- PATH FIX FOR RENDER ---
+        # This points to the folder created by our render-build.sh script
         if os.environ.get("RENDER"):
             chrome_options.binary_location = "/opt/render/project/.render/chrome/opt/google/chrome/chrome"
         # --------------------------
 
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        print("Chrome Initialized.")
+        try:
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            print("Chrome Initialized Successfully.")
+        except Exception as e:
+            print(f"Failed to initialize Chrome: {str(e)}")
+            raise e
 
 @app.route('/', methods=['GET'])
 def home():
@@ -47,7 +53,7 @@ def login():
     try:
         init_driver()
         driver.get("https://www.screener.in/login/")
-        time.sleep(1)
+        time.sleep(2)
         
         # Login Process
         driver.find_element(By.NAME, "username").send_keys(data['username'])
@@ -79,7 +85,6 @@ def get_screens():
             if txt:
                 screens.append({"name": txt, "url": l.get_attribute("href")})
         
-        # Deduplicate
         unique = list({v['url']:v for v in screens}.values())
         return jsonify(unique)
     except Exception as e:
