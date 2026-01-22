@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Exit on error
 set -o errexit
 
 STORAGE_DIR=/opt/render/project/.render
@@ -12,16 +11,13 @@ if [[ ! -d $STORAGE_DIR/chrome ]]; then
   dpkg -x ./google-chrome-stable_current_amd64.deb $STORAGE_DIR/chrome
   rm ./google-chrome-stable_current_amd64.deb
   
-  # Unlock the binary
+  # CRITICAL: This unlocks Chrome so the server can run it
   chmod +x $STORAGE_DIR/chrome/opt/google/chrome/chrome
   cd -
 else
   echo "...Using Chrome from cache"
 fi
 
-# INSTALL SYSTEM LIBRARIES (The Missing Piece)
-echo "...Installing System Libraries"
-# This ensures Render's environment has what it needs to run a browser
 pip install -r requirements.txt
 
 echo "...Installing Selenium Drivers"
