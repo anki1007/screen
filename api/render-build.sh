@@ -12,16 +12,17 @@ if [[ ! -d $STORAGE_DIR/chrome ]]; then
   dpkg -x ./google-chrome-stable_current_amd64.deb $STORAGE_DIR/chrome
   rm ./google-chrome-stable_current_amd64.deb
   
-  # UNLOCK PERMISSIONS
+  # Unlock permissions
   chmod +x $STORAGE_DIR/chrome/opt/google/chrome/chrome
   cd -
 else
   echo "...Using Chrome from cache"
 fi
 
-# INSTALL LIBRARIES
+# Clean old drivers and install dependencies
+pip install --upgrade pip
 pip install -r requirements.txt
 
-# FORCE INSTALL MATCHING DRIVER
-echo "...Installing Matching Selenium Drivers"
-python -c "from webdriver_manager.chrome import ChromeDriverManager; from selenium.webdriver.chrome.service import Service; ChromeDriverManager().install()"
+# Force install the driver that matches Chrome 144
+echo "...Updating Selenium Driver"
+python -c "from webdriver_manager.chrome import ChromeDriverManager; ChromeDriverManager().install()"
